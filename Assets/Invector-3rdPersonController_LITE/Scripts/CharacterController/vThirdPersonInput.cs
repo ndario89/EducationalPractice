@@ -12,6 +12,8 @@ namespace Invector.vCharacterController
         public KeyCode jumpInput = KeyCode.Space;
         public KeyCode strafeInput = KeyCode.Tab;
         public KeyCode sprintInput = KeyCode.LeftShift;
+        public int Health = 3;
+        
 
         [Header("Camera Input")]
         public string rotateCameraXInput = "Mouse X";
@@ -41,6 +43,12 @@ namespace Invector.vCharacterController
             cc.UpdateMotor();               // updates the ThirdPersonMotor methods
             cc.ControlLocomotionType();     // handle the controller locomotion type and movespeed
             cc.ControlRotationType();       // handle the controller rotation type
+            if (Health <= 0)
+            {
+                Destroy(gameObject);
+            }
+            
+        
         }
 
         protected virtual void Update()
@@ -49,7 +57,8 @@ namespace Invector.vCharacterController
             float Vertshoot = Input.GetAxis("VerticalShooting");
             if((Horshoot != 0 || Vertshoot != 0) && Time.time > lastFire + fireDelay)
             {
-
+                Shoot(Horshoot, Vertshoot);
+                lastFire = Time.time;
             }
             InputHandle();                  // update the input methods
             cc.UpdateAnimator();            // updates the Animator Parameters
@@ -59,7 +68,12 @@ namespace Invector.vCharacterController
         void Shoot(float x, float y)
         {
             GameObject bullet = Instantiate(bulletPrefab, transform.position, transform.rotation) as GameObject;
-            
+            bullet.AddComponent<Rigidbody2D>().gravityScale = 0;
+            bullet.GetComponent<Rigidbody2D>().velocity = new Vector3(
+                (x < 0) ? Mathf.Floor(x) * bulletSpeed : Mathf.Ceil(x) * bulletSpeed,
+                (y < 0) ? Mathf.Floor(y) * bulletSpeed : Mathf.Ceil(y) * bulletSpeed,
+                0
+            );
         }
 
         public virtual void OnAnimatorMove()
@@ -127,10 +141,10 @@ namespace Invector.vCharacterController
             if (tpCamera == null)
                 return;
 
-            var Y = Input.GetAxis(rotateCameraYInput);
-            var X = Input.GetAxis(rotateCameraXInput);
+            //var Y = Input.GetAxis(rotateCameraYInput);
+            //var X = Input.GetAxis(rotateCameraXInput);
 
-            tpCamera.RotateCamera(X, Y);
+            //tpCamera.RotateCamera(X, Y);
         }
 
         protected virtual void StrafeInput()
